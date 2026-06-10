@@ -53,6 +53,7 @@ namespace IoTGateway.Controllers
                     Key = request.DeviceId.ToString(),
                     Value = bytes
                 });
+                _logger.LogInformation("Published telemetry from device {DeviceId}", request.DeviceId);
                 return Ok();
             }
             catch (ProduceException<string, byte[]> ex)
