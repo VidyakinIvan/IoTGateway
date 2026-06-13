@@ -10,7 +10,8 @@ var kafkaBootstrap = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS
 builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
-        .AddPrometheusExporter());
+        .AddPrometheusExporter()
+        .AddMeter("IoTGateway"));
 
 builder.Services.AddSingleton<IProducer<string, byte[]>>(sp =>
 {
