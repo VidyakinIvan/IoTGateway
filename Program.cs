@@ -9,7 +9,10 @@ builder.Services.AddSingleton<IProducer<string, byte[]>>(sp =>
 {
     var config = new ProducerConfig
     {
-        BootstrapServers = kafkaBootstrap
+        BootstrapServers = kafkaBootstrap,
+        EnableIdempotence = true,
+        TransactionalId = "gateway-tx-1",
+        Acks = Acks.All
     };
     return new ProducerBuilder<string, byte[]>(config).Build();
 });
