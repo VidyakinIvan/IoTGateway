@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using OpenTelemetry.Metrics;
+using System.Diagnostics.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,10 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 app.MapPrometheusScrapingEndpoint();
+
+var meterFactory = app.Services.GetRequiredService<IMeterFactory>();
+Console.WriteLine($"MeterFactory: {meterFactory.GetType().Name}");
+
 app.MapControllers();
 app.MapHealthChecks("/health");
 
