@@ -1,8 +1,15 @@
 using Confluent.Kafka;
+using OpenTelemetry.Metrics;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var kafkaBootstrap = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") 
     ?? "my-cluster-kafka-bootstrap.kafka:9092";
+
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddPrometheusExporter());
 
 builder.Services.AddSingleton<IProducer<string, byte[]>>(sp =>
 {
@@ -20,6 +27,7 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+app.MapPrometheusScrapingEndpoint();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
