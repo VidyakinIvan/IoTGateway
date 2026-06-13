@@ -1,5 +1,4 @@
 using Confluent.Kafka;
-
 var builder = WebApplication.CreateBuilder(args);
 
 var kafkaBootstrap = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS") 
@@ -14,7 +13,9 @@ builder.Services.AddSingleton<IProducer<string, byte[]>>(sp =>
         TransactionalId = "gateway-tx-1",
         Acks = Acks.All
     };
-    return new ProducerBuilder<string, byte[]>(config).Build();
+    var producer = new ProducerBuilder<string, byte[]>(config).Build();
+    producer.InitTransactions(TimeSpan.FromSeconds(10));
+    return producer;
 });
 
 builder.Services.AddControllers();
