@@ -10,49 +10,19 @@ namespace IoTGateway.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    public class TelemetryController : ControllerBase
+    public class TelemetryController(IProducer<string, byte[]> producer, ILogger<TelemetryController> logger) : ControllerBase
     {
-        private readonly IProducer<string, byte[]> _producer;
-        private readonly ILogger<TelemetryController> _logger;
+        private readonly IProducer<string, byte[]> _producer = producer;
+        private readonly ILogger<TelemetryController> _logger = logger;
 
         private static readonly Meter Meter = new Meter("IoTGateway", "1.0.0");
         private static readonly Counter<int> RequestCounter = Meter.CreateCounter<int>("gateway_requests_total", "Total number of requests");
         private static readonly Histogram<double> RequestDuration = Meter.CreateHistogram<double>("gateway_request_duration_ms", "Request duration in milliseconds");
-        private static readonly Counter<int> JitCounter = Meter.CreateCounter<int>("dotnet_jit_methods_compiled_total", "Total JIT compiled methods");
-        
-        private static int _lastJitCount = 0;
-        private static readonly object _jitLock = new object();
-
-        public TelemetryController(IProducer<string, byte[]> producer, ILogger<TelemetryController> logger)
-        {
-            _producer = producer;
-            _logger = logger;
-
-            lock (_jitLock)
-            {
-                var current = _lastJitCount;
-                if (current < 100)
-                {
-                    current += 2;
-                    _lastJitCount = current;
-                    JitCounter.Add(2);
-                }
-            }
-        }
 
         [HttpPost]
         public async Task<IActionResult> PostTelemetry([FromBody] TelemetryRequest request)
         {
             var stopwatch = Stopwatch.StartNew();
-
-            lock (_jitLock)
-            {
-                if (_lastJitCount < 100)
-                {
-                    _lastJitCount++;
-                    JitCounter.Add(1);
-                }
-            }
 
             if (request.DeviceId <= 0)
             {
