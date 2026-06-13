@@ -22,12 +22,6 @@ namespace IoTGateway.Controllers
                 return BadRequest("DeviceId must be positive");
             }
 
-            if (request.Value is < -50 or > 150)
-            {
-                _logger.LogWarning("Invalid value: {Value} from device {DeviceId}", request.Value, request.DeviceId);
-                return BadRequest("Value out of range [-50, 150]");
-            }
-
             if (request.Timestamp <= 0)
             {
                 _logger.LogWarning("Invalid timestamp from device {DeviceId}", request.DeviceId);
